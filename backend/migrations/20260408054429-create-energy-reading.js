@@ -11,15 +11,15 @@ module.exports = {
       },
       timestamp: {
         type: Sequelize.DATE,
-        allowNull: false // Kohustuslik!
+        allowNull: false
       },
       location: {
         type: Sequelize.STRING,
-        allowNull: false // Kohustuslik!
+        allowNull: false
       },
       price_eur_mwh: {
         type: Sequelize.FLOAT,
-        allowNull: true // Võib olla null
+        allowNull: true
       },
       source: {
         type: Sequelize.STRING,
@@ -34,8 +34,17 @@ module.exports = {
         type: Sequelize.DATE
       }
     });
+
+    // Unikaalne piirang: sama timestamp + location ei tohi korduda
+    // See tagab, et upsert töötab õigesti
+    await queryInterface.addIndex('EnergyReadings', ['timestamp', 'location'], {
+      unique: true,
+      name: 'unique_timestamp_location'
+    });
   },
+
   async down(queryInterface, Sequelize) {
+    await queryInterface.removeIndex('EnergyReadings', 'unique_timestamp_location');
     await queryInterface.dropTable('EnergyReadings');
   }
 };

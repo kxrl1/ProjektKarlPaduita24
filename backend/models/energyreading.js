@@ -1,26 +1,41 @@
 'use strict';
-const {
-  Model
-} = require('sequelize');
+const { Model } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
   class EnergyReading extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
-    static associate(models) {
-      // define association here
-    }
+    static associate(models) {}
   }
+
   EnergyReading.init({
-    timestamp: DataTypes.DATE,
-    location: DataTypes.STRING,
-    price_eur_mwh: DataTypes.FLOAT,
-    source: DataTypes.STRING
+    timestamp: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    location: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    price_eur_mwh: {
+      type: DataTypes.FLOAT,
+      allowNull: true, // võib olla null vastavalt nõuetele
+    },
+    source: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: 'UPLOAD',
+    }
   }, {
     sequelize,
     modelName: 'EnergyReading',
+    // Unikaalne piirang duplikaatide vältimiseks (timestamp + location)
+    indexes: [
+      {
+        unique: true,
+        fields: ['timestamp', 'location'],
+        name: 'unique_timestamp_location'
+      }
+    ]
   });
+
   return EnergyReading;
 };
